@@ -2,7 +2,7 @@ class Tey < Formula
   desc "Package and Kex toolchain manager"
   homepage "https://github.com/kexhq/kex"
   license "MIT"
-  head "https://github.com/kexhq/kex.git", branch: "package-management"
+  head "https://github.com/kexhq/kex.git", branch: "main"
 
   depends_on "cmake"
   depends_on "boost"
