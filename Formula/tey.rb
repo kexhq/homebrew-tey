@@ -17,6 +17,7 @@ class Tey < Formula
                     "-DCMAKE_BUILD_TYPE=Release"
     system "cmake", "--build", "build", "--parallel"
     system "cmake", "--install", "build"
+    system "make", "-C", "tey", "clean"
     system "make", "-C", "tey", "install", "PREFIX=#{prefix}",
                    "KEX=#{buildpath}/build/kex", "INSTALL_NONINTERACTIVE=1"
   end
