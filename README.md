@@ -9,8 +9,9 @@ brew tap kexhq/tey
 brew install --HEAD kexhq/tey/tey
 ```
 
-To rebuild after a new commit lands in the Kex repository:
+To rebuild after a new commit lands in the Kex repository, reinstall the
+formula (the `--HEAD` option is only used with `brew install`):
 
 ```sh
-brew reinstall --HEAD kexhq/tey/tey
+brew reinstall --build-from-source kexhq/tey/tey
 ```
