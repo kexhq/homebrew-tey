@@ -28,10 +28,8 @@ tey kex install <version>   # any published version
 tey kex use <version>       # switch what `kex` runs
 ```
 
-Until the first tagged stable release the formula has no `url` to install from,
-and that command will tell you so. Build the current development version
-instead — it compiles a Kex too (Tey is written in Kex) and puts it in the same
-place:
+The `--HEAD` build installs the current development version instead — it
+compiles a Kex too (Tey is written in Kex) and puts it in the same place:
 
 ```sh
 brew install --HEAD kexhq/tey/tey
