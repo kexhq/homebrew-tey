@@ -58,6 +58,11 @@ tey kex install 0.4.0-rc.1
 tey kex use 0.4.0-rc.1
 ```
 
+Every change here is checked before it can merge: `.github/workflows/ci.yml`
+runs `brew style` and `brew audit --strict --online`, then installs the formula
+and uses it — `kex` on both backends, `tey run` on a scaffolded package,
+`tey kex install` — on macOS arm64, macOS x86_64 and Linux.
+
 `Formula/tey.rb` is updated by kexhq/kex's release workflow: publishing a
 stable version opens a pull request here pointing the formula at that release.
 It fills two marked regions and nothing else — `# <<STABLE-TEY` with the Tey
