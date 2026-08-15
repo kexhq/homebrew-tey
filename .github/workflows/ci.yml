@@ -1,0 +1,107 @@
+name: CI
+
+# The formula in this tap is what `brew install tey` runs, and a broken one is
+# a broken install for everyone who tries it. Most changes here arrive as a
+# pull request opened by kexhq/kex's release workflow — nobody types them — so
+# this is the only thing standing between a bad rewrite and a merge.
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+# Cancel a superseded run: the release workflow force-updates its branch when a
+# release is re-run, and only the newest formula matters.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Seconds, and catches most of what goes wrong in a generated formula:
+  # syntax, component order, a `sha256` that is not a hash, a `url` that 404s.
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: Homebrew/actions/setup-homebrew@master
+
+      # `brew style`/`audit`/`install` take a formula NAME, not a path — paths
+      # are disabled — so the checkout has to BE a tap before brew will look at
+      # it. A symlink is enough; the checkout is already a git repository.
+      - name: Tap this checkout
+        run: |
+          set -euo pipefail
+          taps="$(brew --repository)/Library/Taps/kexhq"
+          mkdir -p "$taps"
+          ln -sfn "$GITHUB_WORKSPACE" "$taps/homebrew-tey"
+
+      - run: brew style kexhq/tey/tey
+
+      # --online fetches every url and checksum the formula names, which is
+      # exactly the part the release workflow generates and can get wrong.
+      - run: brew audit --strict --online kexhq/tey/tey
+
+  # Installing it for real, on every platform Kex publishes for. This is what
+  # proves the generated `resource` blocks name an archive that exists, unpack
+  # where the formula expects, and produce a `kex` that runs.
+  install:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, macos-13, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Tap this checkout
+        run: |
+          set -euo pipefail
+          taps="$(brew --repository)/Library/Taps/kexhq"
+          mkdir -p "$taps"
+          ln -sfn "$GITHUB_WORKSPACE" "$taps/homebrew-tey"
+
+      # Before the first stable release the formula has no `url`, so there is
+      # nothing to install from and --HEAD is the only path. It compiles a Kex,
+      # which is slow, but it is also the only install anyone can do today.
+      - name: Decide how to install
+        id: how
+        run: |
+          set -euo pipefail
+          if grep -Eq '^ *url "https://github\.com/kexhq/kex/releases/' Formula/tey.rb; then
+            echo "flags=" >> "$GITHUB_OUTPUT"
+            echo "Formula names a release; installing the stable path"
+          else
+            echo "flags=--HEAD" >> "$GITHUB_OUTPUT"
+            echo "No release url yet; installing --HEAD"
+          fi
+
+      - run: brew install --verbose ${{ steps.how.outputs.flags }} kexhq/tey/tey
+
+      # The formula's own test block: `kex` runs out of the keg on both
+      # backends, tey compiles a scaffolded package, and `tey kex install`
+      # takes the bundled compiler into the Tey home.
+      - run: brew test --verbose kexhq/tey/tey
+
+      # What the test block cannot check, because `brew test` runs with HOME
+      # redirected into a sandbox: that these work as a user meets them, from
+      # PATH, against a real home. It is the claim the whole design rests on —
+      # install Tey, and `kex` works.
+      - name: Use it the way a user would
+        run: |
+          set -euo pipefail
+          printf 'main do\n  IO.printLine("installed")\nend\n' > hello.kex
+          tey --version
+          kex --version
+          [ "$(kex hello.kex)" = "installed" ]
+          [ "$(kex -R hello.kex)" = "installed" ]
+
+          # And that Tey can take the bundled compiler over — the step that
+          # outlives `brew uninstall`.
+          tey kex install
+          tey kex list
+          kex --version
+
+      - run: brew uninstall kexhq/tey/tey
