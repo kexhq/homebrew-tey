@@ -13,7 +13,8 @@ class Tey < Formula
   # architecture-independent: one small archive serves every platform. It sits
   # above `license` because that is the component order `brew audit` enforces.
   # <<STABLE-TEY
-  # No tagged stable release yet — install with --HEAD.
+  url "https://github.com/kexhq/kex/releases/download/v0.3.1/tey-0.3.1.tar.gz"
+  sha256 "b9c748aaf197efccb0ca72addcb1162cd3e5863b5483477abd2312850e4079e8"
   # STABLE-TEY>>
 
   license "MIT"
@@ -51,6 +52,27 @@ class Tey < Formula
   # this one only while Tey has selected nothing. `tey kex install` takes this
   # copy into the Tey home; every later version comes from Tey alone.
   # <<STABLE-KEX
+  on_macos do
+    resource "kex" do
+      url "https://github.com/kexhq/kex/releases/download/v0.3.1/kex-0.3.1-macos-arm64.tar.gz"
+      sha256 "af98ef799a48e996057a5f7be55ec460666f4deab00b9f5a3aa4d7b7e28a2122"
+    end
+  end
+
+  on_linux do
+    on_arm do
+      resource "kex" do
+        url "https://github.com/kexhq/kex/releases/download/v0.3.1/kex-0.3.1-linux-arm64.tar.gz"
+        sha256 "c94f4a75e6e57885778f8df1f7a8a589ec8612361f36660a48534efea549b9ba"
+      end
+    end
+    on_intel do
+      resource "kex" do
+        url "https://github.com/kexhq/kex/releases/download/v0.3.1/kex-0.3.1-linux-x86_64.tar.gz"
+        sha256 "ba682d0c13ff09b0311a8fccd08ac43f1fc63e312b1f15ce90dfaaa0f7814a99"
+      end
+    end
+  end
   # STABLE-KEX>>
 
   # The keg holds `bin/tey`, `bin/kex` — Tey's dispatcher, not a compiler — and
