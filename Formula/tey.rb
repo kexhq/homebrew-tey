@@ -21,15 +21,25 @@ class Tey < Formula
   head do
     url "https://github.com/kexhq/kex.git", branch: "main"
     # Only this path compiles anything: Tey is written in Kex, so building it
-    # from a checkout means building Kex first.
+    # from a checkout means building Kex first. Boost is a build-time need of
+    # that compile alone — a released archive statically links the one piece of
+    # it Kex uses; see the dependency list below.
     depends_on "cmake" => :build
+    depends_on "boost"
   end
 
   # Tey needs only erlang. The rest are for the Kex it installs: a released
-  # archive links them dynamically and was built against brew's copies, so
-  # they have to be here before `tey kex install` can produce a working
-  # compiler.
-  depends_on "boost"
+  # archive links them dynamically, by soname, so they have to be here before
+  # `tey kex install` can produce a working compiler.
+  #
+  # Boost is NOT among them, and deliberately: its Linux soname carries the
+  # upstream version (libboost_context.so.1.83.0 from the Ubuntu runner that
+  # builds the archive), which no brew boost will ever match — 0.3.1 shipped
+  # with this dependency declared, satisfied, and useless, and `brew test`
+  # caught the archive's `kex` unable to start. Kex links Boost.Context
+  # statically in released builds instead (KEX_BOOST_STATIC, see its
+  # CMakeLists.txt), so the archive carries it. The --HEAD path compiles Kex
+  # here and does need it, which is why the dependency lives in `head do`.
   depends_on "erlang"
   depends_on "gmp"
   depends_on "pcre2"
