@@ -13,8 +13,9 @@ class Tey < Formula
   # architecture-independent: one small archive serves every platform. It sits
   # above `license` because that is the component order `brew audit` enforces.
   # <<STABLE-TEY
-  url "https://github.com/kexhq/kex/releases/download/v0.3.3/tey-0.3.3.tar.gz"
-  sha256 "ed665989f173cc85a3ed906112aaad8abdc10d528f558b7d676fbc8e117dc572"
+  url "https://github.com/kexhq/kex/releases/download/v0.3.4/tey-0.2.0.tar.gz"
+  version "0.3.4"
+  sha256 "759df2dfbada0672520085e8a85b6c42c3584f575a53683e05e2ac04687891f1"
   # STABLE-TEY>>
 
   license "MIT"
@@ -64,19 +65,19 @@ class Tey < Formula
   # <<STABLE-KEX
   resource "kex" do
     on_macos do
-      url "https://github.com/kexhq/kex/releases/download/v0.3.3/kex-0.3.3-macos-arm64.tar.gz"
-      sha256 "04e63fe6daf84a6af6b5a32f7048b1bf737c805455612ff09defda4b61e1cabf"
+      url "https://github.com/kexhq/kex/releases/download/v0.3.4/kex-0.3.4-macos-arm64.tar.gz"
+      sha256 "33ba05a8f42877d264db4b93d4627638a96ca02aefaf18f922a34a4e62ff28fc"
     end
 
     on_linux do
       on_arm do
-        url "https://github.com/kexhq/kex/releases/download/v0.3.3/kex-0.3.3-linux-arm64.tar.gz"
-        sha256 "b23f0fd070bf0b2d495370d46df3c7ea4d5686b9fa5946fc8447336836dd8d49"
+        url "https://github.com/kexhq/kex/releases/download/v0.3.4/kex-0.3.4-linux-arm64.tar.gz"
+        sha256 "359932b7ec04612200e6e63a8973a8eba705801c66967b9afb5bf69c2b689c76"
       end
 
       on_intel do
-        url "https://github.com/kexhq/kex/releases/download/v0.3.3/kex-0.3.3-linux-x86_64.tar.gz"
-        sha256 "d604b0a23ab21cfce6bbe844576b1613dcdafa4b2995a004ee20a468fa6f6c95"
+        url "https://github.com/kexhq/kex/releases/download/v0.3.4/kex-0.3.4-linux-x86_64.tar.gz"
+        sha256 "6c1a3ce25e7d9a5d8adac813d657678570859b8820e224af0d3fb2a82780cb11"
       end
     end
   end
