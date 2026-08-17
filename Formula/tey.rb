@@ -14,7 +14,6 @@ class Tey < Formula
   # above `license` because that is the component order `brew audit` enforces.
   # <<STABLE-TEY
   url "https://github.com/kexhq/kex/releases/download/v0.3.4/tey-0.2.0.tar.gz"
-  version "0.3.4"
   sha256 "759df2dfbada0672520085e8a85b6c42c3584f575a53683e05e2ac04687891f1"
   # STABLE-TEY>>
 
@@ -146,8 +145,11 @@ class Tey < Formula
     assert_equal "42\n", shell_output("#{bin}/kex #{testpath}/hello.kex")
     assert_equal "42\n", shell_output("#{bin}/kex -R #{testpath}/hello.kex")
 
-    # And tey compiles with the same one.
-    system bin/"tey", "init", "demo"
+    # And tey compiles with the same one. `new`, not `init`: since Tey 0.2.0
+    # `init` adopts the directory you are standing in (as `git init` does) and
+    # only `new` creates one — after an `init demo` there is no demo/ to cd
+    # into, which is how this test went red on the 0.3.4 bump.
+    system bin/"tey", "new", "demo"
     assert_equal "Hello from demo!\n", shell_output("cd demo && #{bin}/tey run")
 
     # Taking it into the Tey home is offline and needs no network.
