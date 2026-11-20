@@ -89,7 +89,29 @@ class Tey < Formula
   # either.
   def install
     if build.head?
-      install_from_source
+      # The bootstrap compiler is installed to libexec, DELIBERATELY off PATH, and
+      # handed to tey as a seed: tey copies it into its own home on first use,
+      # selects it, and from then on owns it like any version it installed itself.
+      #
+      # The revision needs no help here: --HEAD is a git checkout, so CMake
+      # reads it from the tree. Only the date has to be supplied.
+      args = std_cmake_args + [
+        "-DCMAKE_INSTALL_PREFIX=#{libexec}/kex-toolchain",
+        "-DKEX_BUILD_DATE=#{Time.now.utc.strftime("%Y-%m-%d")}",
+      ]
+
+      system "cmake", "-S", ".", "-B", "build", *args
+      system "cmake", "--build", "build", "--parallel"
+      # bin/kex plus share/kex/{stdlib,runtime,manifest}: the compiler cannot run
+      # without the stdlib sources, and `-R`/`--compile` cannot without the
+      # runtime. The whole tree is the unit tey adopts.
+      system "cmake", "--install", "build"
+
+      # Compiled by the compiler just built, never by whatever kex may already
+      # be on PATH.
+      system "make", "-C", "tey", "clean"
+      system "make", "-C", "tey", "install", "PREFIX=#{prefix}",
+                     "KEX=#{buildpath}/build/kex", "INSTALL_NONINTERACTIVE=1"
     else
       prefix.install Dir["*"]
       # One directory per archive, holding bin/kex and share/kex/{stdlib,
@@ -155,32 +177,5 @@ class Tey < Formula
     # Taking it into the Tey home is offline and needs no network.
     system bin/"tey", "kex", "install"
     assert_path_exists testpath/".local/share/tey/current"
-  end
-
-  private
-
-  # The bootstrap compiler is installed to libexec, DELIBERATELY off PATH, and
-  # handed to tey as a seed: tey copies it into its own home on first use,
-  # selects it, and from then on owns it like any version it installed itself.
-  def install_from_source
-    # The revision needs no help here: --HEAD is a git checkout, so CMake
-    # reads it from the tree. Only the date has to be supplied.
-    args = std_cmake_args + [
-      "-DCMAKE_INSTALL_PREFIX=#{libexec}/kex-toolchain",
-      "-DKEX_BUILD_DATE=#{Time.now.utc.strftime("%Y-%m-%d")}",
-    ]
-
-    system "cmake", "-S", ".", "-B", "build", *args
-    system "cmake", "--build", "build", "--parallel"
-    # bin/kex plus share/kex/{stdlib,runtime,manifest}: the compiler cannot run
-    # without the stdlib sources, and `-R`/`--compile` cannot without the
-    # runtime. The whole tree is the unit tey adopts.
-    system "cmake", "--install", "build"
-
-    # Compiled by the compiler just built, never by whatever kex may already
-    # be on PATH.
-    system "make", "-C", "tey", "clean"
-    system "make", "-C", "tey", "install", "PREFIX=#{prefix}",
-                   "KEX=#{buildpath}/build/kex", "INSTALL_NONINTERACTIVE=1"
   end
 end
